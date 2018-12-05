@@ -471,7 +471,7 @@ void mdss_dsi_panel_ie_level_setting(struct mdss_panel_data *pdata, int level)
 		memset(&cmdreq, 0, sizeof(cmdreq));
 		cmdreq.cmds = &ie_level_cmd;
 		cmdreq.cmds_cnt = 1;
-		cmdreq.flags = CMD_REQ_COMMIT | CMD_CLK_CTRL;
+		cmdreq.flags = CMD_REQ_COMMIT;
 		cmdreq.rlen = 0;
 		cmdreq.cb = NULL;
 
@@ -500,7 +500,7 @@ void mdss_dsi_panel_lcd_pwm_level_setting(struct mdss_panel_data *pdata, int bri
 	memset(&cmdreq, 0, sizeof(cmdreq));
 	cmdreq.cmds = &pwm_level_cmd;
 	cmdreq.cmds_cnt = 1;
-	cmdreq.flags = CMD_REQ_COMMIT | CMD_CLK_CTRL;
+	cmdreq.flags = CMD_REQ_COMMIT;
 	cmdreq.rlen = 0;
 	cmdreq.cb = NULL;
 
