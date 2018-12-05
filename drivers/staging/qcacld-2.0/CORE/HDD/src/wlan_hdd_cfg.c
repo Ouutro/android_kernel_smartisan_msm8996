@@ -5736,8 +5736,7 @@ VOS_STATUS hdd_update_mac_config(hdd_context_t *pHddCtx)
 {
    int status, i = 0;
    const struct firmware *fw = NULL;
-   char *line, *buffer = NULL;
-   char *name, *value;
+   char mac0[100], mac1[100];
    tCfgIniEntry macTable[VOS_MAX_CONCURRENCY_PERSONA];
    tSirMacAddr customMacAddr;
 
@@ -5760,52 +5759,18 @@ VOS_STATUS hdd_update_mac_config(hdd_context_t *pHddCtx)
       goto config_exit;
    }
 
-   buffer = (char *)fw->data;
-
-   /* data format:
-    * Intf0MacAddress=00AA00BB00CC
-    * Intf1MacAddress=00AA00BB00CD
-    * END
-    */
-   while (buffer != NULL)
-   {
-      line = get_next_line(buffer);
-      buffer = i_trim(buffer);
-
-      if (strlen((char *)buffer) == 0 || *buffer == '#') {
-         buffer = line;
-         continue;
-      }
-      if (strncmp(buffer, "END", 3) == 0)
-         break;
-
-      name = buffer;
-      buffer = strchr(buffer, '=');
-      if (buffer) {
-         *buffer++ = '\0';
-         i_trim(name);
-         if (strlen(name) != 0) {
-            buffer = i_trim(buffer);
-            if (strlen(buffer) == 12) {
-               value = buffer;
-               macTable[i].name = name;
-               macTable[i++].value = value;
-               if (i >= VOS_MAX_CONCURRENCY_PERSONA)
-                  break;
-            }
-         }
-      }
-      buffer = line;
-   }
-   if (i <= VOS_MAX_CONCURRENCY_PERSONA) {
-      hddLog(VOS_TRACE_LEVEL_INFO, "%s: %d Mac addresses provided", __func__, i);
-   }
-   else {
+   i = sscanf((char *)fw->data, "Intf0MacAddress=%s Intf1MacAddress=%s END", mac0, mac1);
+   if (i != 2) {
       hddLog(VOS_TRACE_LEVEL_ERROR, "%s: invalid number of Mac address provided, nMac = %d",
              __func__, i);
       vos_status = VOS_STATUS_E_INVAL;
       goto config_exit;
    }
+
+   macTable[0].name = "Intf0MacAddress";
+   macTable[0].value = mac0;
+   macTable[1].name = "Intf1MacAddress";
+   macTable[1].value = mac1;
 
    update_mac_from_string(pHddCtx, &macTable[0], i);
 
